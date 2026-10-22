@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     parameters {
         choice(
             name: 'ENVIRONMENT',
@@ -22,7 +26,9 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'abdulkalamay/smart-agriculture-portal'
         APP_NAME = 'smart-agriculture-portal'
-        SERVICE_NAME = 'smart-agriculture-service'
+        SERVICE_NAME = 'smart-agriculture-portal-service'
+        PREVIOUS_DEPLOYMENT_EXISTS = 'false'
+        DEPLOYMENT_UPDATE_STARTED = 'false'
     }
 
     stages {
@@ -42,8 +48,10 @@ pipeline {
                     steps {
                         powershell '''
                             $content = Get-Content index.html -Raw
-                            if (-not $content.Contains("FLD-101") -or -not $content.Contains("FLD-105")) {
-                                throw "Missing required 5 agricultural field records!"
+                            foreach ($fieldId in 101..105) {
+                                if (-not $content.Contains(("FLD-{0}" -f $fieldId))) {
+                                    throw "Missing agricultural field record FLD-$fieldId"
+                                }
                             }
                             Write-Output "HTML Sensor Data Check Passed: All 5 fields verified."
                         '''
@@ -54,6 +62,9 @@ pipeline {
                         powershell '''
                             if (-not (Test-Path "Dockerfile") -or -not (Test-Path "deployment.yaml")) {
                                 throw "Missing Dockerfile or deployment.yaml"
+                            }
+                            if (-not (Test-Path "health.html")) {
+                                throw "Missing health.html required by the Docker image"
                             }
                             Write-Output "Docker & Kubernetes Manifest Check Passed."
                         '''
@@ -86,14 +97,19 @@ Audit Status : PASSED
 
         stage('Archive Build Artifacts') {
             steps {
-                archiveArtifacts artifacts: 'irrigation_audit_report.txt,index.html,deployment.yaml', fingerprint: true
+                script {
+                    archiveArtifacts artifacts: 'index.html,deployment.yaml', fingerprint: true
+                    if (params.RUN_WATER_AUDIT) {
+                        archiveArtifacts artifacts: 'irrigation_audit_report.txt', fingerprint: true
+                    }
+                }
             }
         }
 
         stage('Build & Test Docker Image') {
             steps {
                 bat "docker build --build-arg RELEASE_VERSION=%IMAGE_TAG% --build-arg SIMULATE_FAULT=%SIMULATE_FAULT% -t %DOCKER_IMAGE%:%IMAGE_TAG% -t %DOCKER_IMAGE%:latest ."
-                bat "docker run --rm %DOCKER_IMAGE%:%IMAGE_TAG% sh -c \"test -f /usr/share/nginx/html/index.html\""
+                bat "docker run --rm %DOCKER_IMAGE%:%IMAGE_TAG% sh -c \"test -s /usr/share/nginx/html/index.html && test -s /usr/share/nginx/html/health.html && test -s /usr/share/nginx/html/release.txt\""
             }
         }
 
@@ -110,13 +126,19 @@ Audit Status : PASSED
         stage('Deploy to Kubernetes & Verify') {
             steps {
                 withCredentials([file(credentialsId: 'kuberconfig', variable: 'KUBECONFIG')]) {
+                    script {
+                        env.PREVIOUS_DEPLOYMENT_EXISTS = bat(
+                            returnStatus: true,
+                            script: 'kubectl get deployment %APP_NAME%'
+                        ) == 0 ? 'true' : 'false'
+                        env.DEPLOYMENT_UPDATE_STARTED = 'true'
+                    }
                     powershell '''
                         $env:KUBECONFIG = "$env:KUBECONFIG"
-                        kubectl get deployment $env:APP_NAME > $null 2>&1
-                        if ($LASTEXITCODE -ne 0) {
+                        if ($env:PREVIOUS_DEPLOYMENT_EXISTS -ne "true") {
                             kubectl apply -f deployment.yaml --validate=false
                         }
-                        kubectl set image deployment/$env:APP_NAME $env:APP_NAME=$($env:DOCKER_IMAGE):$($env:IMAGE_TAG)
+                        kubectl set image deployment/$env:APP_NAME portal-container=$($env:DOCKER_IMAGE):$($env:IMAGE_TAG)
                         kubectl rollout status deployment/$env:APP_NAME --timeout=60s
                         if ($LASTEXITCODE -ne 0) {
                             throw "Deployment rollout failed health checks!"
@@ -135,13 +157,23 @@ Audit Status : PASSED
             withCredentials([file(credentialsId: 'kuberconfig', variable: 'KUBECONFIG')]) {
                 powershell '''
                     Write-Output "=== FAILED RELEASE DETECTED: TRIGGERING AUTOMATIC ROLLBACK ==="
-                    kubectl get pods -l app=$env:APP_NAME
-                    kubectl get events --field-selector type=Warning --sort-by=.lastTimestamp | Select-Object -Last 10
-                    kubectl rollout undo deployment/$env:APP_NAME
-                    kubectl rollout status deployment/$env:APP_NAME --timeout=90s
-                    Write-Output "=== ROLLBACK SUCCESSFUL: RESTORED PREVIOUS STABLE RELEASE ==="
-                    kubectl get deployment $env:APP_NAME -o wide
-                    kubectl get pods -l app=$env:APP_NAME -o wide
+                    if ($env:DEPLOYMENT_UPDATE_STARTED -eq "true" -and $env:PREVIOUS_DEPLOYMENT_EXISTS -eq "true") {
+                        kubectl get pods -l app=$env:APP_NAME
+                        kubectl get events --field-selector type=Warning --sort-by=.lastTimestamp | Select-Object -Last 10
+                        kubectl rollout undo deployment/$env:APP_NAME
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Rollback failed for deployment $env:APP_NAME"
+                        }
+                        kubectl rollout status deployment/$env:APP_NAME --timeout=90s
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Rollback rollout did not become healthy"
+                        }
+                        Write-Output "=== ROLLBACK SUCCESSFUL: RESTORED PREVIOUS STABLE RELEASE ==="
+                        kubectl get deployment $env:APP_NAME -o wide
+                        kubectl get pods -l app=$env:APP_NAME -o wide
+                    } else {
+                        Write-Output "No existing deployment to roll back."
+                    }
                 '''
             }
         }

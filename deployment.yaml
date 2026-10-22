@@ -30,7 +30,7 @@ spec:
         # Liveness Probe (Checks if the container needs a restart)
         livenessProbe:
           httpGet:
-            path: /
+            path: /health.html
             port: 80
           initialDelaySeconds: 15
           periodSeconds: 20
@@ -38,7 +38,7 @@ spec:
         # Readiness Probe (Checks if the container is ready to accept traffic)
         readinessProbe:
           httpGet:
-            path: /
+            path: /health.html
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
