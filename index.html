@@ -4,50 +4,214 @@
     <meta charset="UTF-8">
     <title>Smart Agriculture and Irrigation Resource Optimization Portal</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f3f7f4; color: #1e2d24; }
-        header { background: #1b5e20; color: white; padding: 24px; text-align: center; }
-        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        h2 { color: #1b5e20; margin-top: 0; }
-        .alert-box { background: #ffebee; border-left: 6px solid #c62828; padding: 14px; margin-bottom: 12px; border-radius: 6px; color: #b71c1c; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { border: 1px solid #cfd8dc; padding: 12px; text-align: left; }
-        th { background: #2e7d32; color: white; }
-        .low-moisture { color: #c62828; font-weight: bold; }
-        .healthy { color: #2e7d32; font-weight: bold; }
-        footer { background: #1b5e20; color: white; text-align: center; padding: 14px; margin-top: 30px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f3f7f4;
+            color: #1e2d24;
+        }
+        header {
+            background: #1b5e20;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1150px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #1b5e20;
+            margin-top: 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .stat-card h3 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            color: #1b5e20;
+        }
+        .stat-card p {
+            margin: 0;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .alert-box {
+            background: #ffebee;
+            border-left: 6px solid #c62828;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            color: #b71c1c;
+            font-weight: bold;
+        }
+        .filter-bar {
+            margin-bottom: 14px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #90a4ae;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #cfd8dc;
+            padding: 11px;
+            text-align: left;
+        }
+        th {
+            background: #2e7d32;
+            color: white;
+        }
+        .low-moisture {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .healthy {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .priority-high {
+            background: #ffcdd2;
+            color: #b71c1c;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .priority-med {
+            background: #fff9c4;
+            color: #f57f17;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        footer {
+            background: #1b5e20;
+            color: white;
+            text-align: center;
+            padding: 14px;
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Smart Agriculture & Irrigation Resource Optimization Portal</h1>
-        <p>Agricultural Research Centre - Real-Time Sensor & Crop Health Monitoring</p>
+        <p>Agricultural Research Centre - Sensor Telemetry, Water Analytics & Irrigation Optimization</p>
     </header>
     <div class="container">
+        <div class="grid">
+            <div class="stat-card"><h3>Total Daily Water Consumption</h3><p>7,600 Litres</p></div>
+            <div class="stat-card"><h3>Lowest Soil Moisture Field</h3><p style="color:#c62828;">FLD-104 (Maize - 18%)</p></div>
+            <div class="stat-card"><h3>Water-Saving Target</h3><p>15% Reduction (6,460 L)</p></div>
+            <div class="stat-card"><h3>Irrigation Completion Status</h3><p>3 / 5 Fields Completed/Active</p></div>
+        </div>
+
         <div class="card">
             <h2>Critical Irrigation Alerts (Soil Moisture &lt; 30%)</h2>
-            <div class="alert-box">ALERT [FLD-102 - Paddy Zone B]: Soil moisture is 22% (Below 30% threshold). Immediate irrigation required!</div>
-            <div class="alert-box">ALERT [FLD-104 - Maize Zone D]: Soil moisture is 18% (Below 30% threshold). Abnormal dry soil detected!</div>
+            <div class="alert-box">ALERT [FLD-104 - Maize Zone D]: Soil moisture at 18% (&lt;30%). Abnormal dry soil condition!</div>
+            <div class="alert-box">ALERT [FLD-102 - Paddy Zone B]: Soil moisture at 22% (&lt;30%). Immediate irrigation required!</div>
         </div>
+
         <div class="card">
             <h2>Field-Wise Sensor & Irrigation Dashboard</h2>
-            <table>
+            <div class="filter-bar">
+                <label for="fieldFilter"><strong>Filter by Field / Status:</strong></label>
+                <select id="fieldFilter" onchange="filterFields()">
+                    <option value="ALL">All Fields (5)</option>
+                    <option value="LOW">Moisture &lt; 30% (Requires Irrigation)</option>
+                    <option value="FLD-101">FLD-101 (Wheat)</option>
+                    <option value="FLD-102">FLD-102 (Paddy)</option>
+                    <option value="FLD-103">FLD-103 (Sugarcane)</option>
+                    <option value="FLD-104">FLD-104 (Maize)</option>
+                    <option value="FLD-105">FLD-105 (Cotton)</option>
+                </select>
+            </div>
+            <table id="fieldTable">
                 <thead>
                     <tr>
-                        <th>Field ID</th><th>Crop Type</th><th>Soil Moisture (%)</th><th>Daily Water (L)</th>
-                        <th>Temp (&deg;C)</th><th>Crop Health</th><th>Irrigation Status</th><th>Next Schedule</th>
+                        <th>Field ID</th><th>Crop Type</th><th>Soil Moisture</th><th>Daily Water (L)</th>
+                        <th>Temp / Weather</th><th>Crop Health</th><th>Irrigation Completion Status</th><th>Next Irrigation Schedule</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>FLD-101</td><td>Wheat</td><td>42%</td><td>1,200 L</td><td>28&deg;C</td><td class="healthy">Optimal</td><td>Completed</td><td>Tomorrow 06:00 AM</td></tr>
-                    <tr><td>FLD-102</td><td>Paddy</td><td class="low-moisture">22%</td><td>2,450 L</td><td>33&deg;C</td><td>Water Stress</td><td>Requires Irrigation</td><td>Today 04:30 PM (Urgent)</td></tr>
-                    <tr><td>FLD-103</td><td>Sugarcane</td><td>38%</td><td>1,850 L</td><td>30&deg;C</td><td class="healthy">Good</td><td>Scheduled</td><td>Tomorrow 07:30 AM</td></tr>
-                    <tr><td>FLD-104</td><td>Maize</td><td class="low-moisture">18%</td><td>980 L</td><td>34&deg;C</td><td>Critical Dry</td><td>Requires Irrigation</td><td>Today 04:00 PM (Immediate)</td></tr>
-                    <tr><td>FLD-105</td><td>Cotton</td><td>35%</td><td>1,120 L</td><td>31&deg;C</td><td class="healthy">Good</td><td>In Progress</td><td>Tomorrow 08:00 AM</td></tr>
+                    <tr data-field="FLD-101" data-moisture="42">
+                        <td>FLD-101</td><td>Wheat</td><td>42%</td><td>1,200 L</td>
+                        <td>28&deg;C / Sunny</td><td class="healthy">Optimal</td><td>100% Completed</td><td>Tomorrow 06:00 AM</td>
+                    </tr>
+                    <tr data-field="FLD-102" data-moisture="22">
+                        <td>FLD-102</td><td>Paddy</td><td class="low-moisture">22%</td><td>2,450 L</td>
+                        <td>33&deg;C / Dry Wind</td><td>Water Stress</td><td>Pending (0% - Alert)</td><td>Today 04:30 PM (Urgent)</td>
+                    </tr>
+                    <tr data-field="FLD-103" data-moisture="38">
+                        <td>FLD-103</td><td>Sugarcane</td><td>38%</td><td>1,850 L</td>
+                        <td>30&deg;C / Humid</td><td class="healthy">Good</td><td>100% Completed</td><td>Tomorrow 07:30 AM</td>
+                    </tr>
+                    <tr data-field="FLD-104" data-moisture="18">
+                        <td>FLD-104</td><td>Maize</td><td class="low-moisture">18%</td><td>980 L</td>
+                        <td>34&deg;C / Heatwave</td><td>Critical Dry</td><td>Pending (0% - Alert)</td><td>Today 04:00 PM (Immediate)</td>
+                    </tr>
+                    <tr data-field="FLD-105" data-moisture="35">
+                        <td>FLD-105</td><td>Cotton</td><td>35%</td><td>1,120 L</td>
+                        <td>31&deg;C / Partly Cloudy</td><td class="healthy">Good</td><td>75% In Progress</td><td>Tomorrow 08:00 AM</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Prioritized Irrigation & Water Conservation Recommendations</h2>
+            <table>
+                <thead>
+                    <tr><th>Priority</th><th>Field ID & Crop</th><th>Current Moisture</th><th>Recommended Action</th><th>Water-Saving Target</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="priority-high">PRIORITY 1 (CRITICAL)</span></td><td>FLD-104 (Maize)</td><td>18%</td><td>Activate automated drip irrigation for 45 mins immediately</td><td>Save 180 L via drip nozzles</td></tr>
+                    <tr><td><span class="priority-high">PRIORITY 2 (HIGH)</span></td><td>FLD-102 (Paddy)</td><td>22%</td><td>Release 600 L canal water during evening low-evaporation window</td><td>Save 320 L via evening schedule</td></tr>
+                    <tr><td><span class="priority-med">PRIORITY 3 (MODERATE)</span></td><td>FLD-105 (Cotton)</td><td>35%</td><td>Maintain soil mulch cover; complete remaining 25% cycle</td><td>Save 140 L via moisture retention</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <footer>Smart Agriculture Portal - CI/CD Automated Monitoring System</footer>
+    <footer>Smart Agriculture Portal - CI/CD Automated Monitoring & Rollback System</footer>
+    <script>
+        function filterFields() {
+            const val = document.getElementById('fieldFilter').value;
+            const rows = document.querySelectorAll('#fieldTable tbody tr');
+            rows.forEach(row => {
+                const field = row.getAttribute('data-field');
+                const moisture = parseInt(row.getAttribute('data-moisture'), 10);
+                if (val === 'ALL') row.style.display = '';
+                else if (val === 'LOW') row.style.display = moisture < 30 ? '' : 'none';
+                else row.style.display = field === val ? '' : 'none';
+            });
+        }
+    </script>
 </body>
 </html>
